@@ -1,0 +1,114 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Xml.Schema;
+using AI;
+using Fiourp;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
+
+namespace CartPole;
+
+public class Env3
+{
+    public Cart Cart;
+    public Pole Pole;
+    private PolicyGradient agent;
+
+    private int timeStep = 0;
+    private int maxDistanceCar = 200;
+
+    int batchSize = 20;
+    List<float[]> states = new();
+    List<float> rewards = new();
+    List<int> actions = new();
+    List<int> episodeLengths = new();
+
+    public Env3()
+    {
+        this.agent = new PolicyGradient(new int[] { 4, 32, 32, 2 });
+        Cart = new Cart();
+        Pole = new Pole(Cart);
+
+        Cart.Reset();
+        Pole.Reset();
+    }
+
+    public void Update()
+    {
+        float[] state = GetState();
+        int action = agent.Act(state);
+        Debug.LogUpdate(action);
+        Cart.Update(action);
+        Pole.Update();
+
+        bool done = Cart.MiddlePos.X > Engine.ScreenSize.X / 2 + maxDistanceCar || Cart.MiddlePos.X < Engine.ScreenSize.X / 2 - maxDistanceCar
+            || Pole.Pos.Y > Cart.Pos.Y - 200 + 60 || timeStep >= 200;
+
+        float reward = 1;
+        if (done)
+            reward = -1;
+
+        states.Add(state);
+        actions.Add(action);
+        rewards.Add(reward);
+
+        timeStep++;
+
+        if (done)
+        {
+            if (timeStep > 100)
+                Console.ForegroundColor = ConsoleColor.Green;
+            else if (timeStep > 70)
+                Console.ForegroundColor = ConsoleColor.Yellow;
+            else
+                Console.ForegroundColor = ConsoleColor.Red;
+
+            Console.WriteLine($"Episode {Main.episode}, Score {timeStep}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            Main.episode++;
+
+            episodeLengths.Add(timeStep);
+            timeStep = 0;
+
+            Cart.Reset();
+            Pole.Reset();
+
+            if(episodeLengths.Count > batchSize)
+            {
+                agent.Train(new PolicyGradientBatch(states.ToArray(), rewards.ToArray(), actions.ToArray(), episodeLengths.ToArray()));
+                states.Clear();
+                actions.Clear();
+                rewards.Clear();
+                episodeLengths.Clear();
+            }
+        }
+    }
+
+    public void Render()
+    {
+        Cart.Render();
+        Pole.Render();
+    }
+
+    public float[] GetState()
+    {
+        //Debug.LogUpdate("Cart Pos: " + (Cart.MiddlePos.X - Engine.ScreenSize.X / 2), "Cart Velocity: " + Cart.Velocity, "Pole Angle: " + Pole.GetAngle(out _), "Pole gap: " + (Pole.Pos.X - Cart.MiddlePos.X));
+
+        /*Console.WriteLine("Cart Pos: " + Normalize(Cart.MiddlePos.X - Engine.ScreenSize.X / 2, -maxDistanceCar, maxDistanceCar) +
+                          "\nCart Velocity: " + Normalize(Cart.Velocity, -20, 20) +
+                          "\nPole Angle: " + Normalize(Pole.GetAngle(out _), -0.72f, 0.72f) +
+                          "\nPole gap: " + Normalize(Pole.Pos.X - Cart.MiddlePos.X, -130, 130));*/
+
+        return new float[4]
+        {
+            Normalize(Cart.MiddlePos.X - Engine.ScreenSize.X / 2, -maxDistanceCar, maxDistanceCar),
+            Normalize(Cart.Velocity, -20, 20),
+            Normalize(Pole.GetAngle(out _), -0.72f, 0.72f),
+            Normalize(Pole.Pos.X - Cart.MiddlePos.X, -130, 130)
+        };
+    }
+
+    public float Normalize(float value, float min, float max)
+        => (value - min) / (max - min);
+}

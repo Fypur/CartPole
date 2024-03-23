@@ -13,6 +13,7 @@ namespace CartPole
         private SpriteBatch _spriteBatch;
 
         public static int episode;
+        Env3 env;
         
         public Main()
         {
@@ -61,18 +62,10 @@ namespace CartPole
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             Drawing.Init(_spriteBatch, Content.Load<SpriteFont>("font"));
 
-            Engine.CurrentMap = new Map(Vector2.Zero);
+            Engine.CurrentMap = new Map();
             Engine.Cam = new Camera(Vector2.Zero, 0, 1);
 
-            /*Cart cart = (Cart)Engine.CurrentMap.Instantiate(new Cart());
-            Engine.CurrentMap.Instantiate(new Pole(cart));*/
-
-            DeepQAgent agent = new DeepQAgent();
-            Engine.CurrentMap.Instantiate(new Environment(agent, true));
-            /*for(int i = 0; i < 10; i++){
-                Environment e = (Environment)Engine.CurrentMap.Instantiate(new Environment(agent, false));
-                e.Visible = false;
-            }*/
+            env = new Env3();
         }
 
         protected override void Update(GameTime gameTime)
@@ -82,9 +75,9 @@ namespace CartPole
                 Exit();
             
             Input.UpdateState();
-            
-            Engine.Update(gameTime);
-            
+
+            env.Update();
+
             Input.UpdateOldState();
 
             if (Input.GetKeyDown(Keys.Space))
@@ -102,10 +95,8 @@ namespace CartPole
             GraphicsDevice.Clear(Color.Black);
 
             _spriteBatch.Begin();
-             
-            Engine.CurrentMap.Render();
-            Engine.CurrentMap.UIRender();
-            Engine.CurrentMap.UIOverlayRender();
+
+            env.Render();
             
             Drawing.DebugString();
             Drawing.DebugPoint(4, 1);
