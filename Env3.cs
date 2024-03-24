@@ -17,7 +17,7 @@ public class Env3
     private int timeStep = 0;
     private int maxDistanceCar = 200;
 
-    int batchSize = 20;
+    int batchSize = 10;
     List<float[]> states = new();
     List<float> rewards = new();
     List<int> actions = new();
@@ -42,7 +42,7 @@ public class Env3
         Pole.Update();
 
         bool done = Cart.MiddlePos.X > Engine.ScreenSize.X / 2 + maxDistanceCar || Cart.MiddlePos.X < Engine.ScreenSize.X / 2 - maxDistanceCar
-            || Pole.Pos.Y > Cart.Pos.Y - 200 + 60 || timeStep >= 200;
+            || Pole.Pos.Y > Cart.Pos.Y - 200 + 60 || timeStep >= 1000;
 
         float reward = 1;
         if (done)
