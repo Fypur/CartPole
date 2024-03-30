@@ -1,5 +1,6 @@
 using System;
 using System.Xml.Schema;
+using AI;
 using Fiourp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -17,6 +18,7 @@ public class Environment : Entity
     private int targetRefreshRate = 50;
 
     private int maxDistanceCar = 200;
+    private bool learning = true;
 
     public Environment(DeepQAgent agent, bool rendered) : base(Vector2.Zero)
     {
@@ -42,16 +44,14 @@ public class Environment : Entity
 
         float reward = 1;
         if (done)
-            reward = -10;
+            reward = -30;
 
         /*for(int i = 0; i < state.Length; i++)
             Debug.LogUpdate(state[i]);*/
 
-        if (agent.learning)
-            agent.Remember(state, action, reward, nextState, done);
+        agent.Remember(state, action, reward, nextState, done);
 
-        if (agent.learning && (agent.filledMemory || agent.iMemory > agent.BatchSize))
-            agent.Replay();
+        agent.Replay();
 
         if (done)
         {
@@ -62,15 +62,12 @@ public class Environment : Entity
             else
                 Console.ForegroundColor = ConsoleColor.Red;
             
-            Console.WriteLine($"Episode {Main.episode}, Score {timeStep}, Epsilon: {agent.epsilon}");
+            Console.WriteLine($"Episode {Main.episode}, Score {timeStep}, Epsilon: {agent.Epsilon}");
             Console.ForegroundColor = ConsoleColor.Gray;
 
             Main.episode++;
             timeStep = 0;
 
-            if(agent.learning && (agent.filledMemory || agent.iMemory > agent.BatchSize))
-                agent.Replay();
-            
             Cart.Reset();
             Pole.Reset();
         }
