@@ -1,5 +1,6 @@
 ﻿using System;
 using Fiourp;
+using AI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -13,7 +14,7 @@ namespace CartPole
         private SpriteBatch _spriteBatch;
 
         public static int episode;
-        Env3 env;
+        Env4 env;
         
         public Main()
         {
@@ -21,28 +22,6 @@ namespace CartPole
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             game1 = this;
-
-            NN2 nn = new(new int[]{ 3, 3, 3 }, 0.01f);
-            nn.Biases = new float[][]{
-                null,
-                new float[] { 2, 2, 2 },
-                new float[] { 2, 2, 2 },
-            };
-
-            nn.Weights = new float[][][]{
-                null,
-                new float[][]{
-                    new float[]{ 1,1,1 },
-                    new float[]{ 1,1,1 },
-                    new float[]{ 1,1,1 }
-                },
-                new float[][]{
-                    new float[]{ 1,1,1 },
-                    new float[]{ 1,1,1 },
-                    new float[]{ 1,1,1 }
-                }
-            };
-            nn.FeedForward(new float[] { 0, 0, 0 });
 
             _graphics.SynchronizeWithVerticalRetrace = false;
             IsFixedTimeStep = false;
@@ -65,7 +44,7 @@ namespace CartPole
             Engine.CurrentMap = new Map();
             Engine.Cam = new Camera(Vector2.Zero, 0, 1);
 
-            env = new Env3();
+            env = new Env4();
         }
 
         protected override void Update(GameTime gameTime)
