@@ -14,7 +14,7 @@ namespace CartPole
         private SpriteBatch _spriteBatch;
 
         public static int episode;
-        Env4 env;
+        Env2 env;
         
         public Main()
         {
@@ -44,7 +44,7 @@ namespace CartPole
             Engine.CurrentMap = new Map();
             Engine.Cam = new Camera(Vector2.Zero, 0, 1);
 
-            env = new Env4();
+            env = new Env2();
         }
 
         protected override void Update(GameTime gameTime)
@@ -55,7 +55,7 @@ namespace CartPole
             
             Input.UpdateState();
 
-            env.Update();
+            env.DoStep();
 
             Input.UpdateOldState();
 

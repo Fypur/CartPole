@@ -15,7 +15,7 @@ namespace CartPole
         private int maxDistanceCar = 200;
         protected override string rewardGraphSaveLocation { get => System.Environment.CurrentDirectory + "/rewardGraph.png"; }
 
-        public Env2(DeepQAgent2 agent) : base(agent, 1000, 5000)
+        public Env2() : base(new DeepQAgent2(new int[] { 4, 32, 32, 2 }, targetRefreshRate:50, totalTimesteps:10000, epsilonDecay:0.01f, learningRate:0.01f, memorySize:4096 * 2), 1000, 5000)
         {
             Cart = new Cart();
             Pole = new Pole(Cart);
